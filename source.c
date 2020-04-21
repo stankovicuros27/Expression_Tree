@@ -6,7 +6,6 @@
 
 #define MAX_CAP 100
 
-
 //-----Character Stack-----
 struct CharStack {
 	int top;
@@ -53,6 +52,76 @@ const char* chstack_peek(struct CharStack* stack) {
 	return stack->array[stack->top];
 }
 //-----Character Stack End-----
+
+
+
+//-----Tree and Nodes-----
+struct Node {
+	char sym[5];
+	int val;
+	struct Node* left, * right, *parent;
+};
+
+struct Node* create_node(char* sym, struct Node* parent, struct Node* left, struct Node* right) {
+	struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+	strcpy(node->sym, sym);
+	node->parent = parent;
+	node->left = left;
+	node->right = right;
+}
+
+struct NodeStack {
+	int top;
+	unsigned capacity;
+	struct Node** array;
+};
+
+struct NodeStack* create_node_stack(unsigned capacity) {
+	struct NodeStack* stack = (struct NodeStack*)malloc(sizeof(struct NodeStack));
+	stack->capacity = capacity;
+	stack->top = -1;
+	stack->array = (struct Node**)malloc(stack->capacity * sizeof(struct Node*));
+	return stack;
+}
+
+int ndstack_is_full(struct NodeStack* stack) {
+	return stack->top == stack->capacity - 1;
+}
+
+int ndstack_is_empty(struct NodeStack* stack) {
+	return stack->top == -1;
+}
+
+void ndstack_push(struct NodeStack* stack, struct Node* item)
+{
+	if (ndstack_is_full(stack))
+		return;
+	stack->array[++stack->top] = item;
+	printf("%s pushed to stack\n", item);
+}
+
+struct Node* ndstack_pop(struct NodeStack* stack)
+{
+	if (ndstack_is_empty(stack)) {
+		return "";
+	}
+	return stack->array[stack->top--];
+}
+
+const char* ndstack_peek(struct NodeStack* stack) {
+	if (ndstack_is_empty(stack)) {
+		return "";
+	}
+	return stack->array[stack->top];
+}
+
+struct Node* make_tree(char* postfix) {
+	struct NodeStack* stack = create_node_stack(MAX_CAP);
+	struct Node* p, * q, * r;
+
+
+}
+//-----Tree and Nodes End-----
 
 int is_operand(char* ch) {
 	if (strlen(ch) > 2) return 0;
