@@ -34,7 +34,6 @@ void chstack_push(struct CharStack* stack, char* item)
 	if (chstack_is_full(stack))
 		return;
 	stack->array[++stack->top] = item;
-	//printf("%s pushed to stack\n", item);
 }
 
 const char* chstack_pop(struct CharStack* stack)
@@ -53,6 +52,8 @@ const char* chstack_peek(struct CharStack* stack) {
 }
 //-----Character Stack End-----
 
+
+//-----operations&operands-----
 int is_operand(char* ch) {
 	if (strlen(ch) > 2) return 0;
 	if (ch[0] >= 'A' && ch[0] <= 'Z') return 1;
@@ -86,7 +87,7 @@ int get_rang(char* operation) {
 	if (strcmp(operation, "sin") == 0 || strcmp(operation, "cos") == 0 || strcmp(operation, "abs")) return 0;
 	return 0;
 }
-
+//-----operations&operands end-----
 
 
 //-----Tree and Nodes-----
@@ -132,7 +133,6 @@ void ndstack_push(struct NodeStack* stack, struct Node* item)
 	if (ndstack_is_full(stack))
 		return;
 	stack->array[++stack->top] = item;
-	//printf("%s pushed to stack\n", item);
 }
 
 struct Node* ndstack_pop(struct NodeStack* stack)
@@ -182,7 +182,6 @@ void ndqueue_insert(struct NodeQueue* queue, struct Node* item) {
 	queue->rear = (queue->rear + 1) % queue->capacity;
 	queue->array[queue->rear] = item;
 	queue->size = queue->size + 1;
-	//printf("%d enqueued to queue\n", item);
 }
 
 struct Node* ndqueue_delete(struct NodeQueue* queue)
@@ -239,7 +238,6 @@ struct Node* make_tree(char* postfix) {
 	return p;
 }
 
-//recursive, but used only for testing!
 void inorder(struct Node* node) {
 	if (node) {
 		inorder(node->left);
@@ -427,10 +425,10 @@ void delete_tree(struct Node* node) {
 	}
 	node = NULL;
 }
-
 //-----Tree and Nodes End-----
 
 
+//-----formatting-----
 char* expr_wrapper(char* expression, char** operands) {
 	int i = -1;
 	int rang = 0;
@@ -507,6 +505,8 @@ char* expr_wrapper(char* expression, char** operands) {
 	operands[++i] = NULL;
 	return res;
 }
+//-----formatting end-----
+
 
 void console_output_start() {
 	printf("Welcome to Expression_Tree application!\n\n");
@@ -554,7 +554,6 @@ int main() {
 
 		switch (menu) {
 		case 1:
-		{
 			if (root) {
 				printf("Tree already exists! Delete it first to enter new expression!\n\n");
 				break;
@@ -578,7 +577,7 @@ int main() {
 			root = make_tree(res);
 			printf("Tree has been made!\n\n");
 			break; 
-		}
+
 		case 2:
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
@@ -588,6 +587,7 @@ int main() {
 			pretty_print_tree(root);
 			printf("\n\n");
 			break;
+
 		case 3:
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
@@ -597,6 +597,7 @@ int main() {
 			levelorder(root);
 			printf("\n\n");
 			break;
+
 		case 4:
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
@@ -606,6 +607,7 @@ int main() {
 			postorder(root);
 			printf("\n\n");
 			break;
+
 		case 5:
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
@@ -614,6 +616,7 @@ int main() {
 			enter_operand_values(root, operands);
 			printf("Operand values sucessfuly initialized! \n\n");
 			break;
+
 		case 6:
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
@@ -622,8 +625,8 @@ int main() {
 			printf("Calculating value...\n");
 			printf("Final result: %lf\n\n", calculate_value(root));
 			break;
+
 		case 7:
-		{
 			if (!root) {
 				printf("Tree is not initialized!\n\n");
 				break;
@@ -632,50 +635,16 @@ int main() {
 			delete_tree(root);
 			root = NULL;
 			printf("Tree sucessfuly deleted!\n\n");
-				break;
-		}
+			break;
+		
 		case 0:
+			printf("\n\nTerminating program... Bye Bye ;)");
 			exit(0);
+
 		default:
 			printf("Invalid command!\n");
 			break;
 		}
 
 	} while (menu != 0);
-
-
-
-
-
-	/*char expression[MAX_CAP];
-	printf("Enter mathematical expression:\n");
-
-	char* str_test = fgets(expression, MAX_CAP, stdin);
-	if (!str_test) {
-		printf("Invalid expression! Terminating program...");
-		exit(1);
-	}
-
-	expression[strcspn(expression, "\n")] = 0;
-	printf("You entered:\n%s\n\n", expression);
-
-	char res[MAX_CAP];
-	char** operands = (char**)malloc(MAX_CAP * sizeof(char*));
-	for (int q = 0; q < MAX_CAP; q++) {
-		operands[q] = (char*)malloc(MAX_CAP * sizeof(char));
-	}
-
-	strcpy(res, expr_wrapper(expression, operands));
-	printf("Postfix : \n %s\n\n", res);
-
-	struct Node* root = make_tree(res);
-	printf("Inorder:\n\n");
-	inorder(root);
-	printf("\n\nPretty Print:\n\n");
-	pretty_print_tree(root, 0);
-
-	enter_operand_values(root, operands);
-
-	printf("Calculate value:\n");
-	printf("%lf", calculate_value(root));*/
 }
