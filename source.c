@@ -143,7 +143,7 @@ struct Node* ndstack_pop(struct NodeStack* stack)
 	return stack->array[stack->top--];
 }
 
-const char* ndstack_peek(struct NodeStack* stack) {
+struct Node* ndstack_peek(struct NodeStack* stack) {
 	if (ndstack_is_empty(stack)) {
 		return NULL;
 	}
@@ -269,7 +269,7 @@ void pretty_print_subtree(struct Node* node, char* prefix) {
 
 	if (hasRight) {
 		int printStrand = (hasLeft && hasRight && (node->right->right != NULL || node->right->left != NULL));
-		char newPrefix[MAX_CAP * MAX_CAP];
+		char newPrefix[MAX_CAP];
 		strcpy(newPrefix, prefix);
 		strcat(newPrefix, (printStrand ? "|     " : "	 "));
 		printf("%s\n", node->right->sym);
@@ -329,6 +329,37 @@ void postorder(struct Node* node) {
 		}
 
 	} while (!ndstack_is_empty(stack));
+}
+
+void preorder(struct Node* node) {
+	if (node == NULL) return;
+	struct NodeStack* stack = create_node_stack(MAX_CAP);
+	struct CharStack* chstack = create_char_stack(MAX_CAP);
+
+	do {
+		while (node) {
+			if (node->left)
+				ndstack_push(stack, node->left);
+			ndstack_push(stack, node);
+			node = node->right;
+		}
+
+		node = ndstack_pop(stack);
+		if (node->left && ndstack_peek(stack) == node->left) {
+			ndstack_pop(stack);
+			ndstack_push(stack, node);
+			node = node->left;
+		}
+		else {
+			chstack_push(chstack, node->sym);
+			node = NULL;
+		}
+
+	} while (!ndstack_is_empty(stack));
+
+	while (!chstack_is_empty(chstack)) {
+		printf("%s ", chstack_pop(chstack));
+	}
 }
 
 double calculate_value(struct Node* node) {
@@ -515,9 +546,10 @@ void console_output_start() {
 	printf("Additionally, unary - operator is coded with \'(-)\'\n");
 	printf("\nAny valid combination of operators, functions and operands is allowed\n");
 	printf("Any invalid combination of operators, functions and operands leads to program termination!\n\n");
-	printf("Enter any symbol to continue!");
-	char c[MAX_CAP];
-	scanf("%s", c);
+	printf("Enter ENTER to continue!");
+	char c;
+	c = fgetc(stdin);
+	while (c != '\n') c = fgetc(stdin);
 	printf("\n");
 }
 
@@ -526,7 +558,7 @@ void console_output() {
 	printf("1.	Create binary tree from expression\n");
 	printf("2.	Print binary tree (pretty print)\n");
 	printf("3.	Print binary tree (modified level order)\n");
-	printf("4.	Print prefix notation of given expression\n");
+	printf("4.	Print prefix and postfix notation of given expression\n");
 	printf("5.	Enter operand values\n");
 	printf("6.	Calculate expression\n");
 	printf("7.	Delete existing tree (required for new expression)\n");
@@ -603,8 +635,10 @@ int main() {
 				printf("Tree is not initialized!\n\n");
 				break;
 			}
-			printf("Prefix notation:\n");
+			printf("Postfix notation:\n");
 			postorder(root);
+			printf("\nPrefix notation:\n");
+			preorder(root);
 			printf("\n\n");
 			break;
 
@@ -638,7 +672,7 @@ int main() {
 			break;
 		
 		case 0:
-			printf("\n\nTerminating program... Bye Bye ;)");
+			printf("\n\nTerminating program... Bye Bye ;)\n\n\n");
 			exit(0);
 
 		default:
