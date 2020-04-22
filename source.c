@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -236,6 +236,44 @@ void inorder(struct Node* node) {
 	}
 }
 
+void pretty_print_subtree(struct Node* node, const char* prefix);
+
+void pretty_print_tree(struct Node * node) {
+	if (node == NULL) return;
+	printf("%s\n", node->sym);
+	pretty_print_subtree(node, "");
+	printf("\n");
+}
+
+void pretty_print_subtree(struct Node* node, char* prefix) {
+	if (node == NULL) return;
+
+	int hasLeft = (node->left != NULL);
+	int hasRight = (node->right != NULL);
+
+	if (!hasLeft && !hasRight) return;
+
+	printf("%s", prefix);
+	printf("%s", (hasLeft && hasRight) ? "|---- " : "");
+	printf("%s", (!hasLeft && hasRight) ? "|---- " : "");
+
+	if (hasRight) {
+		int printStrand = (hasLeft && hasRight && (node->right->right != NULL || node->right->left != NULL));
+		char newPrefix[MAX_CAP * MAX_CAP];
+		strcpy(newPrefix, prefix);
+		strcat(newPrefix, (printStrand ? "|     " : "	 "));
+		printf("%s\n", node->right->sym);
+		pretty_print_subtree(node->right, newPrefix);
+	}
+
+	if (hasLeft) {
+		printf("%s|---- %s\n", (hasRight ? prefix : ""), node->left->sym);
+		char newPrefix[MAX_CAP * MAX_CAP];
+		strcpy(newPrefix, prefix);
+		pretty_print_subtree(node->left, strcat(newPrefix, "	"));
+	}
+}
+
 void levelorder(struct Node* node) {
 	struct NodeQueue* queue = create_node_queue(MAX_CAP);
 	ndqueue_insert(queue, node);
@@ -250,7 +288,29 @@ void levelorder(struct Node* node) {
 			printf("\n");
 			continue;
 		}
-		printf("%s ", p->sym);
+		printf("%s", p->sym);
+		if (is_operand(p->sym)) printf("(%d)", p->val);
+		printf(" ");
+
+		if (p->left) ndqueue_insert(queue, p->left);
+		if (p->right) ndqueue_insert(queue, p->right);
+	}
+}
+
+void update_tree_values(struct Node* node, char* sym, int val) {
+	struct NodeQueue* queue = create_node_queue(MAX_CAP);
+	ndqueue_insert(queue, node);
+	ndqueue_insert(queue, NULL);
+	struct Node* p = NULL;
+
+	while (!ndqueue_is_empty(queue)) {
+		p = ndqueue_delete(queue);
+		if (!p) {
+			if (!ndqueue_is_empty(queue))
+				ndqueue_insert(queue, NULL);
+			continue;
+		}
+		if (strcmp(p->sym, sym) == 0) p->val = val;
 		if (p->left) ndqueue_insert(queue, p->left);
 		if (p->right) ndqueue_insert(queue, p->right);
 	}
@@ -259,8 +319,8 @@ void levelorder(struct Node* node) {
 
 
 
-char* infix_to_postfix(char* expression) {
-	int i = 0;
+char* infix_to_postfix(char* expression, char** operands) {
+	int i = -1;
 	int rang = 0;
 
 	struct CharStack* stack = create_char_stack(MAX_CAP);
@@ -277,6 +337,19 @@ char* infix_to_postfix(char* expression) {
 	while (ptr != NULL) 
 	{
 		if (is_operand(ptr)) {
+			int present = 0;
+			for (int k = 0; k < i; k++) {
+				if (strcmp(operands[k], ptr) == 0) {
+					present = 1;
+					break;
+				}
+			}
+	
+			if (!present) {
+				char* tmp = malloc(MAX_CAP * (sizeof(char)));
+				strcpy(tmp, ptr);
+				strcpy(operands[++i], tmp);
+			} 
 			rang++;
 			strcat(res, ptr);
 			strcat(res, " ");
@@ -318,28 +391,53 @@ char* infix_to_postfix(char* expression) {
 		strcat(res, chstack_pop(stack));
 		strcat(res, " ");
 	}
+
+	operands[++i] = NULL;
 	return res;
+}
+
+void enter_operand_values(struct Node *root, char** chArr) {
+
+	int i = 0;
+	while (chArr[i]) {
+		printf("Enter val of %s :", chArr[i]);
+		int k;
+		scanf("%d", &k);
+		update_tree_values(root, chArr[i], k);
+		printf("\n");
+		i++;
+	}
+	printf("\n\nTree node values updated: \n");
+	levelorder(root);
 }
 
 int main() {
 	char expression[MAX_CAP];
 	printf("Enter mathematical expression:\n");
+
 	char* str_test = fgets(expression, MAX_CAP, stdin);
 	if (!str_test) {
 		printf("Invalid expression! Terminating program...");
 		exit(1);
 	}
+
 	expression[strcspn(expression, "\n")] = 0;
 	printf("You entered:\n%s\n\n", expression);
 
 	char res[MAX_CAP];
+	char** operands = (char**)malloc(MAX_CAP * sizeof(char*));
+	for (int q = 0; q < MAX_CAP; q++) {
+		operands[q] = (char*)malloc(MAX_CAP * sizeof(char));
+	}
 
-	strcpy(res, infix_to_postfix(expression));
+	strcpy(res, infix_to_postfix(expression, operands));
 	printf("Postfix : \n %s\n\n", res);
 
 	struct Node* root = make_tree(res);
 	printf("Inorder:\n\n");
 	inorder(root);
-	printf("\n\nLevelOrder:\n\n");
-	levelorder(root);
+	printf("\n\nPretty Print:\n\n");
+	pretty_print_tree(root, 0);
+
+	enter_operand_values(root, operands);
 }
