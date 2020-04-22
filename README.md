@@ -1,3 +1,3 @@
 ## Expression Tree program
 ##### Calculating and manipulating mathematical expressions by making a binary expression tree
-![console screenshot](https://photos.google.com/album/AF1QipOG44aD9iWk7HdXE2-Ey6bJH-dqowgZlcD2TQnc/photo/AF1QipM9-wSBz8aZeyBpua-H3ytcSHX9jjm7AQbZlrld)
+![console screenshot](<blockquote class="imgur-embed-pub" lang="en" data-id="a/ZNoJGyg" data-context="false" ><a href="//imgur.com/a/ZNoJGyg"></a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>)
