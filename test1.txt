@@ -1,1 +1,11 @@
-( ln A / tg ( B - (-) C + tg D ) ) * (-) ( E - A ) * C
+( ln ( A ) / tg ( ( B - (-) C + tg D ) ) ) * (-) ( ( E - A ) * C )
+A = 5, B = 4, C = 3, D = 2, E = 1, res = -1.987959, correct!
+
+( A / ( B - C + D ) ) * ( E - A ) * (-) C
+A = 5, B = 4, C = 3, D = 2, E = 1, res = 20, correct!
+
+abs ( ( ln ( A ) / tg ( ( B - (-) C + tg D ) ) ) * (-) ( ( E - A ) * C ) )
+A = 5, B = 4, C = 3, D = 2, E = 1, res = 1.987959, correct!
+
+sin ( cos ( abs ( ( ln ( A ) / tg ( ( B - (-) C + tg D ) ) ) * (-) ( ( E - A ) * C ) ) ) )
+A = 5, B = 4, C = 3, D = 2, E = 1, res = -0.394174, correct!
