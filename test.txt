@@ -9,3 +9,6 @@ A = 5, B = 4, C = 3, D = 2, E = 1, res = 1.987959, correct!
 
 sin ( cos ( abs ( ( ln ( A ) / tg ( ( B - (-) C + tg D ) ) ) * (-) ( ( E - A ) * C ) ) ) )
 A = 5, B = 4, C = 3, D = 2, E = 1, res = -0.394174, correct!
+
+min ( ( A + B ^ C ) , ( D + E ^ F ) )
+A = 2, B = 3, C = 4, D = 3, E = 3, C = 4, res = 83, correct!

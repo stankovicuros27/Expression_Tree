@@ -66,6 +66,7 @@ int get_priority(char* operation) {
 	if (strcmp(operation, "^") == 0) return 3;
 	if (strcmp(operation, "ln") == 0 || strcmp(operation, "tg") == 0 || strcmp(operation, "sin") == 0 || strcmp(operation, "cos") == 0) return 4;
 	if (strcmp(operation, "(-)") == 0 || strcmp(operation, "abs") == 0) return 4;
+	if (strcmp(operation, "min") == 0) return 4;
 	return -1;
 }
 
@@ -75,6 +76,7 @@ int is_operation(char* operation) {
 	if (strcmp(operation, "^") == 0) return 3;
 	if (strcmp(operation, "ln") == 0 || strcmp(operation, "tg") == 0 || strcmp(operation, "sin") == 0 || strcmp(operation, "cos") == 0) return 4;
 	if (strcmp(operation, "(-)") == 0 || strcmp(operation, "abs") == 0) return 4;
+	if (strcmp(operation, "min") == 0) return 4;
 	return -1;
 }
 
@@ -85,6 +87,7 @@ int get_rang(char* operation) {
 	if (strcmp(operation, "ln") == 0) return 0;
 	if (strcmp(operation, "(-)") == 0 || strcmp(operation, "tg") == 0) return 0;
 	if (strcmp(operation, "sin") == 0 || strcmp(operation, "cos") == 0 || strcmp(operation, "abs")) return 0;
+	if (strcmp(operation, "min") == 0) return 0;
 	return 0;
 }
 //-----operations&operands end-----
@@ -214,7 +217,7 @@ struct Node* make_tree(char* postfix) {
 		else {
 			p = create_node(ptr);
 			t1 = ndstack_pop(stack);
-			if (get_rang(ptr) == 1) {
+			if (get_rang(ptr) == 1 || strcmp(ptr, "min") == 0) {
 				t2 = ndstack_pop(stack);
 			}
 			else t2 = NULL;
@@ -235,6 +238,7 @@ struct Node* make_tree(char* postfix) {
 	}
 
 	p = ndstack_pop(stack);
+	free(stack);
 	return p;
 }
 
@@ -303,6 +307,7 @@ void levelorder(struct Node* node) {
 		if (p->left) ndqueue_insert(queue, p->left);
 		if (p->right) ndqueue_insert(queue, p->right);
 	}
+	free(queue);
 }
 
 void postorder(struct Node* node) {
@@ -329,6 +334,7 @@ void postorder(struct Node* node) {
 		}
 
 	} while (!ndstack_is_empty(stack));
+	free(stack);
 }
 
 void preorder(struct Node* node) {
@@ -360,6 +366,8 @@ void preorder(struct Node* node) {
 	while (!chstack_is_empty(chstack)) {
 		printf("%s ", chstack_pop(chstack));
 	}
+	free(stack);
+	free(chstack);
 }
 
 double calculate_value(struct Node* node) {
@@ -401,6 +409,10 @@ double calculate_value(struct Node* node) {
 			if (val(node->left) < 0) return -val(node->left);
 			return val(node->left);
 		}
+		else if (strcmp(node->sym, "min") == 0) {
+			if (val(node->left) < val(node->right)) return val(node->left);
+			else return val(node->right);
+		}
 	}
 	printf("Invalid tree calculation!");
 	exit(1);
@@ -424,6 +436,7 @@ void update_tree_values(struct Node* node, char* sym, double val) {
 		if (p->left) ndqueue_insert(queue, p->left);
 		if (p->right) ndqueue_insert(queue, p->right);
 	}
+	free(queue);
 }
 
 void enter_operand_values(struct Node* root, char** chArr) {
@@ -455,13 +468,14 @@ void delete_tree(struct Node* node) {
 		free (p);
 	}
 	node = NULL;
+	free(queue);
 }
 //-----Tree and Nodes End-----
 
 
 //-----formatting-----
 char* expr_wrapper(char* expression, char** operands) {
-	int i = -1;
+	int i = -1; 
 	int rang = 0;
 
 	struct CharStack* stack = create_char_stack(MAX_CAP);
@@ -477,6 +491,10 @@ char* expr_wrapper(char* expression, char** operands) {
 
 	while (ptr != NULL) 
 	{
+		if (strcmp(ptr, ",") == 0) {
+			ptr = strtok(NULL, delim);
+			continue;
+		}
 		if (is_operand(ptr)) {
 			int present = 0;
 			for (int k = 0; k < i; k++) {
@@ -489,6 +507,7 @@ char* expr_wrapper(char* expression, char** operands) {
 				char* tmp = malloc(MAX_CAP * (sizeof(char)));
 				strcpy(tmp, ptr);
 				strcpy(operands[++i], tmp);
+				free(tmp);
 			} 
 
 			rang++;
@@ -534,6 +553,7 @@ char* expr_wrapper(char* expression, char** operands) {
 	}
 
 	operands[++i] = NULL;
+	free(stack);
 	return res;
 }
 //-----formatting end-----
@@ -578,6 +598,7 @@ int main() {
 	char expression[MAX_CAP];
 	char util[MAX_CAP];
 	char** operands = NULL;
+	int vals_initialized = 0;
 
 	do {
 		console_output();
@@ -649,6 +670,7 @@ int main() {
 			}
 			enter_operand_values(root, operands);
 			printf("Operand values sucessfuly initialized! \n\n");
+			vals_initialized = 1;
 			break;
 
 		case 6:
@@ -656,8 +678,13 @@ int main() {
 				printf("Tree is not initialized!\n\n");
 				break;
 			}
+			if (!vals_initialized) {
+				printf("Operand values not initialized!!\n\n");
+				break;
+			}
 			printf("Calculating value...\n");
 			printf("Final result: %lf\n\n", calculate_value(root));
+			vals_initialized = 0;
 			break;
 
 		case 7:
@@ -668,6 +695,7 @@ int main() {
 			printf("Deleting tree...\n");
 			delete_tree(root);
 			root = NULL;
+			vals_initialized = 0;
 			printf("Tree sucessfuly deleted!\n\n");
 			break;
 		
@@ -676,7 +704,7 @@ int main() {
 			exit(0);
 
 		default:
-			printf("Invalid command!\n");
+			printf("Invalid command!\n\n");
 			break;
 		}
 
